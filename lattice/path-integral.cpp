@@ -2,6 +2,13 @@
 /* first draft: procedural; specific */
 #include "path-integral.h"
 
+
+int PathIntegral::get_progress()
+{
+	return progress;
+}
+
+
 void PathIntegral::populate_lattice(double start, double end)
 {
 	int i;
@@ -25,9 +32,8 @@ void PathIntegral::run(int nruns, Observable observable, void *arg)
 {
 	int i;
 	double *action = new double[N];
-	Lattice lattice(N);
 
-	for (i = 0; i < N; i++)
+	for (i = 0; i < N - 1; i++)
 	{
 		action[i] = local_lagrangian(lattice, lagrangian, i, tau);
 	}
@@ -43,6 +49,8 @@ void PathIntegral::run(int nruns, Observable observable, void *arg)
 
 		double delta_action = l1 + l2 - action[j-1] - action[j];
 
+		progress++;
+
 		/* metropolis rule */
 		if (delta_action < 0
 			|| accept(generator) < exp( - delta_action * tau ))
@@ -52,8 +60,13 @@ void PathIntegral::run(int nruns, Observable observable, void *arg)
 			action[j] = l2;
 		}
 
-		observable(lattice, arg);
+		static int k = 0;
+		if (k++ % 1000 == 0)
+		{
+			observable(lattice, arg);
+		}
 	}
 
+	delete[] action;
 }
 

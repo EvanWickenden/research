@@ -7,7 +7,7 @@
 
 struct Lattice
 {
-	double *lattice; /* public while in development */
+	double *lattice; 
 	int N;
 
 	Lattice(int N) : lattice(new double[N]), N(N) {}
