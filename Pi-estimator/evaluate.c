@@ -50,7 +50,7 @@ produce:
     if (sem_trywait(&empty) != 0) 
     {
         if (errno == EAGAIN) goto consume;
-        else goto end;
+        goto end;
     }
     pthread_mutex_lock(&lock); /* spinlock? */
     *++end = coord;
@@ -64,7 +64,7 @@ consume:
     if (sem_trywait(&full) != 0) 
     {
         if (errno == EAGAIN) goto produce;
-        else goto end;
+        goto end;
     }
 
     pthread_mutex_lock(&lock);
