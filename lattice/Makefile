@@ -2,19 +2,20 @@
 
 CXX = clang++
 CC = clang++
-CXXFLAGS = -g -Wall -std=c++11
+CXXFLAGS = -g -Wall -std=c++11 -Ofast
 LDFLAGS = -lpthread
 
-run: lattice.o path-integral.o
+generate-samples: lattice.o path-integral.o
 
-run.o: path-integral.h
+generate-samples.o: path-integral.h
 
 lattice.o: lattice.h
 
 path-integral.o: lattice.h path-integral.h
 
-.PHONY: clean
+.PHONY: clean all
 
 clean:
-	rm -f *.o run vgcore.*
+	rm -f *.o generate-samples vgcore.*
 
+all: clean generate-samples

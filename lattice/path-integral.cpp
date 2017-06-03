@@ -1,5 +1,4 @@
 
-/* first draft: procedural; specific */
 #include "path-integral.h"
 
 
@@ -60,8 +59,9 @@ void PathIntegral::run(int nruns, Observable observable, void *arg)
 			action[j] = l2;
 		}
 
+		/* sample, more or less, once per entire path change */
 		static int k = 0;
-		if (k++ % 1000 == 0)
+		if (k++ % N == 0)
 		{
 			observable(lattice, arg);
 		}

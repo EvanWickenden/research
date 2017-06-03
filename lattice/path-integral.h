@@ -6,7 +6,7 @@
 #include <random>
 #include "lattice.h"
  
-typedef double (*Lagrangian)(double q, double qdot); 
+typedef double (*Lagrangian)(const double& q, const double& qdot); 
 typedef void (*Observable)(const Lattice& lattice, void *arg);
 
 class PathIntegral
