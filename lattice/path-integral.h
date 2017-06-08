@@ -17,30 +17,27 @@ class PathIntegral
 	std::uniform_real_distribution<double> accept;
 
 	int N; /* reduntant; also appears in lattice struct */
-	int progress;
 	double tau;
-	Lattice lattice;
-	Lagrangian lagrangian;
+	Lattice lattice; /* operator[] automatically imposes % N */
 
 	public:
 
-	PathIntegral(int N, double tau, Lagrangian lagrangian) :
+	long progress;
+
+	PathIntegral(int N, double tau) :
 		generator((int) &N),
 		delta(0, 1),
-		index(1, N - 2),
+		index(1, N - 1),
 		accept(0, 1),
 		N(N),
-		progress(0),
 		tau(tau),
 		lattice(N),
-		lagrangian(lagrangian)
+		progress(0)
 	{ }
 
 	void populate_lattice(double start, double end);
 
-	void run(int nruns, Observable observable, void *arg);
-
-	int get_progress();
+	void run(int nruns, Lagrangian lagrangian, Observable observable, void *arg);
 };
 
 

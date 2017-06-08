@@ -14,9 +14,10 @@ struct Lattice
 	
 	~Lattice() { delete[] lattice; }
 
-	double& operator[](int i) { return lattice[i]; }
+	/* automatically impose periodic boundary condition */
+	double& operator[](int i) { return lattice[i % N]; }
 
-	const double& operator[](int i) const { return lattice[i]; }
+	const double& operator[](int i) const { return lattice[i % N]; }
 	
 };
 

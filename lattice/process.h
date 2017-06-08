@@ -2,24 +2,38 @@
 #define __PROCESS_H__
 
 #include <math.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <vector>
 
-class Process
+
+struct Process
 {
-	std::vector<float>& data;
-	int n; 				/* total number of samples */
-	int tau_exp; 		/* exponential autocorrelation time; treat as starting index */
-	double tau_int; 	/* integrated autocorrelation time */
+	double *data; 		/* data to analyze */
+	int n;				/* dimensions of data array */
 	double mu; 			/* mean */
-	double var;			/* variance */
-	double* C[2]; 		/* unnormalized autocorrelation function */
-	double M;			/* windowing cutoff */
+	double *C; 			/* unnormalized autocorrelation function */
+	long M;				/* autocorrelation window */
+	long progress;
 
-	public:
+	/* calculate the unnormalized autocorrelation function over the domain provided */
+	Process(double *data, int n, int M = 100) : 
+		data(data), 
+		n(n), 
+		mu(0), 
+		C(new double[n]),
+		M(M), /* sensible initial value depends on data set */
+		progress(0)
+	{
+		mean();
+	}
 
-		Process(std::vector<float>& data, int n, double tau_exp = 0) : data(data), n(n), tau_exp(tau_exp) {}
+	~Process() { delete[] C; }
+
+	long& get_progress() { return progress; }
+
+	double mean();
+	void unnormalized_autocorrelation_function();
+	void record_C(char *name);
+	double exponential_autocorrelation_time();
+	double integrated_autocorrelation_time(float c = 5.0);
 };
 
 

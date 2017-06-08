@@ -7,24 +7,10 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#include "monitor.h"
 
-const int N = 100;
-const double tau = .01;
-const int nruns = 10000000;
+#include "settings.h" /* nruns; tau; N */
 
-void *monitor_progress(PathIntegral* p)
-{
-	int progress;
-	double percent;
-	while (1)
-	{
-		progress = p->get_progress();
-		percent =  progress / (float) nruns;
-		fprintf(stderr, "\r  %d / %d :  %.4f", progress, nruns, percent);
-
-		sleep(1);
-	}
-}
 
 
 double harmonic_oscillator(const double& q, const double& qdot)
@@ -37,7 +23,11 @@ void inline x1_x2(const Lattice& lattice, FILE *arg)
 	static int i = lattice.N / 3;
 	static int j = 2 * i;
 
-	fprintf(arg, "%lf, %lf\n", lattice[i], lattice[j]);
+	//fprintf(arg, "%lf, %lf\n", lattice[i], lattice[j]);
+	double product = lattice[i] * lattice[j];
+
+	fwrite(&product, sizeof (double), 1, arg);
+
 }
 
 pthread_t progress;
@@ -55,15 +45,16 @@ int main()
 		exit(1);
 	}
 
-	pthread_create(&progress, NULL, (void *(*)(void *)) monitor_progress, &p);
+
+	Monitor monitor;
+
+	monitor.start("generate observable samples", &p.progress, &nruns);
 
 	p.run(nruns, (Observable) &x1_x2, fp);
 
-	pthread_cancel(progress);
+	monitor.end();
 
-	char zeros[100] = { ' ' };
-
-	std::cout << "\ndone :)" << zeros << std::endl;
+	std::cout << "\ndone :)" << std::endl;
 
 	fclose(fp);
 }
