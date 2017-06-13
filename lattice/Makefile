@@ -2,30 +2,31 @@
 
 CXX = clang++
 CC = clang++
-CXXFLAGS = -I/home/evan/lib/ -g -Wall -std=c++11 -Ofast
-LDFLAGS = -L/home/evan/lib/ -lpthread -lmonitor
+CXXFLAGS = -Wpedantic -Wall -std=c++11 -Ofast
+LDFLAGS = -lpthread 
 
 
 .PHONY: default
-default: generate-samples analyze-samples
+default: simulation #analyze-samples
 
-generate-samples: lattice.o path-integral.o ../monitor/monitor.o
 
-generate-samples.o: path-integral.h settings.h log.h
+simulation: path-integral.o monitor.o process.o
 
-lattice.o: lattice.h 
+simulation.o: path-integral.h monitor.h warray.h log.h process.h
 
-path-integral.o: lattice.h path-integral.h settings.h log.h
+path-integral.o: warray.h path-integral.h log.h
 
 process.o: process.h
 
-analyze-samples: process.o ../monitor/monitor.o
+analyze-samples: process.o monitor.o
 
-analyze-samples.o: process.h settings.h log.h 
+analyze-samples.o: process.h log.h 
+
+monitor.o: monitor.h
 
 .PHONY: clean all
 
 clean:
-	rm -f *.o generate-samples analyze-samples vgcore.*
+	rm -f *.o simulation analyze-samples vgcore.*
 
-all: clean generate-samples
+all: clean default

@@ -7,14 +7,16 @@
 /**
  * 	\mu = 1/n \sum_i=1^n f_i
  */
+
 double Process::mean()
 {
 	int i = 0;
 	double sum = 0;
-	progress = 0;
+//	monitor.prime("mean:", n);
+
 	for (; i < n; i++)
 	{
-		progress++;
+//		monitor++;
 		sum += data[i];
 	}
 	return mu = sum / n;
@@ -28,22 +30,19 @@ double Process::mean()
 void Process::unnormalized_autocorrelation_function()
 {
 	int i = 0;
-	progress = 0;
-	fprintf(stderr, "\r%ld", progress);
+	monitor.prime("unnormalized autocorrelation function:", n);
+	
 	for (;i < n; i++)
 	{
-		/* this fucking optimization! */
-		if (++progress == 0)
-			fprintf(stderr, "\r%ld", progress);
+		monitor++;
 
 		double sum = 0;
 		int j = 0;
-		for (; j < n-i; j++)
+		for (; j < n-i; j += 10)
 		{
 			sum += (data[j] - mu) * (data[j+i] - mu);
 		}	
 		C[i] = sum / (n-i); 
-
 	}
 }
 
@@ -61,13 +60,16 @@ void Process::record_C(char *filename)
 /* overestimate by replacing limsup with max */
 double Process::exponential_autocorrelation_time()
 {
-	double tau = 0;
+	double tau = 1;
 	double temp;
 	int i = 0;
-	progress = 0;
+
+//	monitor.prime("exponential autocorrelation time:", n);
+
 	for (; i < n; i++)
 	{
-		progress++;
+//		monitor.i++;
+		if (C[i] == 0) continue;
 		temp = - i / std::log(C[i]);
 		if (temp > tau) tau = temp;
 	}
@@ -84,23 +86,25 @@ double Process::exponential_autocorrelation_time()
  *  iterative process: increase M until M >= 5 tau_exp(M)
  *	might be sensitive to properly chosen initial value for M
  */
-
-double Process::integrated_autocorrelation_time(float c)
+double Process::integrated_autocorrelation_time(long _M, float c) 
 {
 	int i;
 	double tau = 0.5;
-	progress = 0;
+	M = _M;
+//	monitor.prime("inegrated autocorrelation time:", M);
+
 	for (i = 1; i < M; i++)
 	{
-		progress++;
+//		monitor++;
 		tau += C[i] / C[0];
 	}
 
 	while (M <= c*tau && M < n)
 	{
-		progress++;
 		tau += C[M] / C[0];
 		M++;
+//		monitor++;
+//		monitor.N++;
 	}
 
 	return tau;

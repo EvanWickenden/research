@@ -4,10 +4,16 @@
 #include <iostream>
 #include <math.h>
 #include <random>
-#include "lattice.h"
- 
-typedef double (*Lagrangian)(const double& q, const double& qdot); 
+
+#include "warray.h"
+#include "monitor.h"
+#include "ratio.h"
+
+typedef WArray<double> Lattice;
+
+typedef double (*Lagrangian)(double q, double qdot); 
 typedef void (*Observable)(const Lattice& lattice, void *arg);
+
 
 class PathIntegral
 {
@@ -19,10 +25,11 @@ class PathIntegral
 	int N; /* reduntant; also appears in lattice struct */
 	double tau;
 	Lattice lattice; /* operator[] automatically imposes % N */
+	Ratio acceptance_ratio;
 
 	public:
 
-	long progress;
+	Monitor monitor;
 
 	PathIntegral(int N, double tau) :
 		generator((int) &N),
@@ -32,8 +39,8 @@ class PathIntegral
 		N(N),
 		tau(tau),
 		lattice(N),
-		progress(0)
-	{ }
+		acceptance_ratio(0, N)
+	{}
 
 	void populate_lattice(double start, double end);
 

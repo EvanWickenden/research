@@ -22,19 +22,21 @@ void PathIntegral::populate_lattice(double start, double end)
 	(_local_lagrangian(_lattice[_index], _lattice[_index + 1], _lagrangian, _tau))
 	
 
-void PathIntegral::run(int nruns, Observable observable, void *arg)
+void PathIntegral::run(int nruns, Lagrangian lagrangian, Observable observable, void *arg)
 {
 	int i;
 	double *action = new double[N];
+
+	monitor.prime("generate samples", nruns);
 
 	for (i = 0; i < N; i++)
 	{
 		action[i] = local_lagrangian(lattice, lagrangian, i, tau);
 	}
 
-	progress = 0;
 	for (i = 0; i < nruns; i++)
 	{
+		monitor++;
 		/* propose; conditionally accept; measure observable */
 		int j = index(generator); 
 		double new_pos = lattice[j] + delta(generator);
@@ -44,8 +46,6 @@ void PathIntegral::run(int nruns, Observable observable, void *arg)
 
 		double delta_action = l1 + l2 - action[(j-1) % N] - action[j];
 
-		progress++;
-
 		/* metropolis rule */
 		if (delta_action < 0
 			|| accept(generator) < exp( - delta_action * tau ))
@@ -53,11 +53,12 @@ void PathIntegral::run(int nruns, Observable observable, void *arg)
 			lattice[j] = new_pos;
 			action[(j - 1) % N] = l1;
 			action[j] = l2;
+			++acceptance_ratio; 
 		}
 
 		/* sample, more or less, once per entire path change */
 		static int k = 0;
-		if (k++ % N == 0)
+		if (k++ % N)
 		{
 			observable(lattice, arg);
 		}
