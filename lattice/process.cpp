@@ -57,22 +57,50 @@ void Process::record_C(char *filename)
  *	\tau_exp = \limsup_{t -> \infty}  \frac {- t} {ln(C_{ff}(t)}
  */
 
-/* overestimate by replacing limsup with max */
 double Process::exponential_autocorrelation_time()
 {
 	double tau = 1;
-	double temp;
+	double temp, temp2;
 	int i = 0;
 
-//	monitor.prime("exponential autocorrelation time:", n);
+	double log_C_0 = std::log(C[0]);
+
+
+	/* limit supremum */
+
+//	LOG("\nexponential autocorrelation time");
+
+	// -i / std::log(C[i])
+
+increasing:
+	
+	for (; i < n; i++)
+	{
+		if (C[i] == 0) continue;
+		temp = - i / (std::log(C[i]) - log_C_0);
+		if (temp > tau) tau = temp;
+		else 
+		{
+//			LOG("local max %lf, C[i] = %lf; C[0] = %lf", tau, C[i], C[0]);
+			temp2 = temp;
+			goto decreasing;
+		}
+	}
+
+decreasing:
 
 	for (; i < n; i++)
 	{
-//		monitor.i++;
 		if (C[i] == 0) continue;
-		temp = - i / std::log(C[i]);
-		if (temp > tau) tau = temp;
+		if (temp2 < (temp = - i / (std::log(C[i]) - log_C_0)))
+		{
+			tau = temp;
+			goto increasing;
+		}
+		temp2 = temp;
 	}
+
+//	LOG("done");
 	return tau;
 }
 

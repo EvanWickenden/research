@@ -2,7 +2,7 @@
 #define __LOG_H__
 
 #include <stdlib.h>
-
+#include <cstdio>
 
 #define LOG(_msg, ...)  	fprintf(stderr, "log: " _msg "\n", ##__VA_ARGS__);
 

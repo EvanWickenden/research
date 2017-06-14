@@ -36,6 +36,11 @@ void inline x1_x2(const Lattice& lattice, double *products)
 }
 
 
+#define less_than_point_2(_tau_exp, _nr_iterations) \
+	({ 	float ratio = _tau_exp / (float) _nr_iterations; \
+		(0 <= ratio && ratio < 0.2) ? (int) (ratio * _nr_iterations) : (int) (0.2 * _nr_iterations) ; })
+
+
 FILE *out;
 void simulate(int lattice_dimensions, double time_step, long nr_iterations, double omega)
 {
@@ -49,10 +54,14 @@ void simulate(int lattice_dimensions, double time_step, long nr_iterations, doub
 	/* minimize memory usage */
 	{
 		PathIntegral p(lattice_dimensions, time_step);
+		p.acceptance_ratio.denominator = nr_iterations;
 		p.populate_lattice(0, 0);
 		p.monitor.start();
 		p.run(nr_iterations, (Lagrangian) &harmonic_oscillator, (Observable) &x1_x2, products.data);
 		p.monitor.end();
+
+		LOG("acceptance ratio: %lf", p.acceptance_ratio());
+//		fprintf(out, "acceptance ratio: %lf", p.acceptance_ratio());
 	}
 
 	products.N = nelts;
@@ -61,11 +70,23 @@ void simulate(int lattice_dimensions, double time_step, long nr_iterations, doub
 
 	Process process(products);
 	process.monitor.start();
-	mean = process.mean();
+	process.mean(); 
 	process.unnormalized_autocorrelation_function();
-	tau_exp = process.exponential_autocorrelation_time();
-	tau_int = process.integrated_autocorrelation_time(10, 4);
 	process.monitor.end();
+
+	tau_exp = 4 * process.exponential_autocorrelation_time();
+
+	/* trim off 4 tau_exp, or 20% of sample, whichever is fewest */
+	int new_start = less_than_point_2(tau_exp, process.n);
+
+	process.data += new_start;
+	process.n -= new_start;
+
+	/* worth recalculating autocorrelation function? */
+	tau_int = process.integrated_autocorrelation_time(10, 4);
+	/* recalculate mean */
+	mean = process.mean();
+
 
 	fprintf(out, "simulation parameters: lattice dimensions %d, time step %lf, MC steps %ld, omega %lf\n",
 		lattice_dimensions,
@@ -73,7 +94,7 @@ void simulate(int lattice_dimensions, double time_step, long nr_iterations, doub
 		nr_iterations,
 		omega);
 
-	fprintf(out, "mean = %lf, tau_exp = %lf, tau_int = %lf\n", mean, tau_exp, tau_int);
+	fprintf(out, "mean = %lf, tau_exp = %lf, nr truncated = %d, tau_int = %lf\n", mean, tau_exp, new_start, tau_int);
 }
 
 
@@ -81,10 +102,10 @@ void simulate(int lattice_dimensions, double time_step, long nr_iterations, doub
 
 int main()
 {
-	double omegas[] = { 0, 1, 2, 4, 6, 8, 10 };
-	int dimensions[] = { 3, 6, 9, 12, 15, 20 };
-	long nruns = 500000;
-	double time_step = 0.1;
+	double omegas[] = { 0, 2, 5, 10, 15 };
+	int dimensions[] = { 3, 6, 9, 15 };
+	long nruns = 1000000;
+	double time_step = 20;
 
 	out = stdout;
 

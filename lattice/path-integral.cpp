@@ -2,6 +2,17 @@
 #include "path-integral.h"
 
 
+PathIntegral::PathIntegral(int N, double tau) :
+	generator((int) &N), /* random seed */
+	delta(0, 1),
+	index(1, N - 1),
+	accept(0, 1),
+	N(N),
+	tau(tau),
+	lattice(N),
+	acceptance_ratio(0, N)
+{}
+
 
 void PathIntegral::populate_lattice(double start, double end)
 {
@@ -25,7 +36,8 @@ void PathIntegral::populate_lattice(double start, double end)
 void PathIntegral::run(int nruns, Lagrangian lagrangian, Observable observable, void *arg)
 {
 	int i;
-	double *action = new double[N];
+//	double *action = new double[N];
+	WArray<double> action(N);
 
 	monitor.prime("generate samples", nruns);
 
@@ -63,7 +75,5 @@ void PathIntegral::run(int nruns, Lagrangian lagrangian, Observable observable, 
 			observable(lattice, arg);
 		}
 	}
-
-	delete[] action;
 }
 

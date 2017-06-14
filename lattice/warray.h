@@ -12,7 +12,8 @@ struct WArray
 	T* data;
 	int N;
 
-	WArray(int N)
+	WArray(int N) :
+		N(N)
 	{
 		data = (T *) malloc(N * sizeof (T));
 		if (data == NULL)
@@ -24,8 +25,8 @@ struct WArray
 		free(data);
 	}
 
-	T& operator[](int i) { return data[i]; }
-	const T& operator[](int i) const { return data[i]; }
+	T& operator[](int i) { return data[i % N]; }
+	const T& operator[](int i) const { return data[i % N]; }
 
 	WArray(const char *load_filename)
 	{

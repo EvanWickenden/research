@@ -1,6 +1,8 @@
 
 #include "ratio.h"
 
+#include "log.h"
+
 Ratio::Ratio(long numerator, long denominator) :
 	numerator(numerator),
 	denominator(denominator)
@@ -13,7 +15,7 @@ Ratio& Ratio::operator++()
 	return *this;
 }
 
-Ratio& Ratio::operator++(int null)
+Ratio& Ratio::operator++(int)
 {
 	denominator++;
 	return *this;

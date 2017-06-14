@@ -25,22 +25,13 @@ class PathIntegral
 	int N; /* reduntant; also appears in lattice struct */
 	double tau;
 	Lattice lattice; /* operator[] automatically imposes % N */
-	Ratio acceptance_ratio;
 
 	public:
 
+	Ratio acceptance_ratio;
 	Monitor monitor;
 
-	PathIntegral(int N, double tau) :
-		generator((int) &N),
-		delta(0, 1),
-		index(1, N - 1),
-		accept(0, 1),
-		N(N),
-		tau(tau),
-		lattice(N),
-		acceptance_ratio(0, N)
-	{}
+	PathIntegral(int N, double tau); 
 
 	void populate_lattice(double start, double end);
 
