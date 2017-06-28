@@ -5,7 +5,7 @@
 PathIntegral::PathIntegral(int N, double tau) :
 	generator((int) &N), /* random seed */
 	delta(0, 1),
-	index(1, N - 1),
+	index(1, N),
 	accept(0, 1),
 	N(N),
 	tau(tau),
@@ -17,9 +17,9 @@ PathIntegral::PathIntegral(int N, double tau) :
 void PathIntegral::populate_lattice(double start, double end)
 {
 	int i;
-	lattice[0] = start;
-	lattice[N - 1] = end;
-	for (i = 1; i < N - 1; i++)
+//	lattice[0] = start;
+//	lattice[N - 1] = end;
+	for (i = 0; i < N; i++)
 	{
 		lattice[i] = delta(generator);
 	}
@@ -36,7 +36,6 @@ void PathIntegral::populate_lattice(double start, double end)
 void PathIntegral::run(int nruns, Lagrangian lagrangian, Observable observable, void *arg)
 {
 	int i;
-//	double *action = new double[N];
 	WArray<double> action(N);
 
 	monitor.prime("generate samples", nruns);
@@ -57,6 +56,8 @@ void PathIntegral::run(int nruns, Lagrangian lagrangian, Observable observable, 
 		double l2 = _local_lagrangian(new_pos, lattice[j +1], lagrangian, tau);
 
 		double delta_action = l1 + l2 - action[(j-1) % N] - action[j];
+
+		/* average delta S should be 1 */
 
 		/* metropolis rule */
 		if (delta_action < 0

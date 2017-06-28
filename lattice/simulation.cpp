@@ -27,12 +27,16 @@ double harmonic_oscillator(double q, double qdot)
 /* operator */
 int nelts;
 int k;
+
+/* lattice element parameters */
+
+int _start_index = 0;
+int difference = 10;
+
 void inline x1_x2(const Lattice& lattice, double *products)
 {
-	static int i = lattice.N / 3;
-	static int j = 2 * i;
 	nelts++;
-	products[k++] = lattice[i] * lattice[j];
+	products[k++] = lattice[_start_index] * lattice[_start_index + difference];
 }
 
 
@@ -42,9 +46,10 @@ void inline x1_x2(const Lattice& lattice, double *products)
 
 
 FILE *out;
-void simulate(int lattice_dimensions, double time_step, long nr_iterations, double omega)
+void simulate(int lattice_dimensions, double time_step, long nr_iterations, double omega, int start_index)
 {
 	_omega = omega;
+	_start_index = start_index;
 	nelts = 0;
 	k = 0;
 
@@ -74,6 +79,21 @@ void simulate(int lattice_dimensions, double time_step, long nr_iterations, doub
 	process.unnormalized_autocorrelation_function();
 	process.monitor.end();
 
+///* DELETE ME */
+//
+//	LOG(out, "simulation parameters: lattice dimensions %d, time step %lf, MC steps %ld, omega %lf\n",
+//		lattice_dimensions,
+//		time_step,
+//		nr_iterations,
+//		omega);
+//
+//	LOG(out, "mean = %lf; start_index %d", mean, _start_index);
+//
+//	return;
+//
+//
+///* __END__ */
+
 	tau_exp = 4 * process.exponential_autocorrelation_time();
 
 	/* trim off 4 tau_exp, or 20% of sample, whichever is fewest */
@@ -102,19 +122,35 @@ void simulate(int lattice_dimensions, double time_step, long nr_iterations, doub
 
 int main()
 {
+	long nruns = 100000;
+	double time_step = 20;
+	out = stderr
+	int i, j;
+
+	/* element offset tester */
+
+	int start_index[] = { 0, 5, 10, 15, 40, 60, 90 };
+
+	for (i = 0; i < NELTS(start_index); i++)
+	{
+		simulate(100, time_step, nruns, 5, start_index[i]);
+	}
+
+	return 0;
+
+	/* old */
+
+
 	double omegas[] = { 0, 2, 5, 10, 15 };
 	int dimensions[] = { 3, 6, 9, 15 };
-	long nruns = 1000000;
-	double time_step = 20;
 
-	out = stdout;
 
-	int i, j;
+
 	for (i = 0; i < NELTS(omegas); i++)
 	{
 		for (j = 0; j < NELTS(dimensions); j++)
 		{
-			simulate(dimensions[j], time_step, nruns, omegas[i]);
+//			simulate(dimensions[j], time_step, nruns, omegas[i]);
 		}
 	}
 }

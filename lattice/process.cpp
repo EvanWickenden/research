@@ -32,13 +32,13 @@ void Process::unnormalized_autocorrelation_function()
 	int i = 0;
 	monitor.prime("unnormalized autocorrelation function:", n);
 	
-	for (;i < n; i++)
+	for (; i < n; i++)
 	{
 		monitor++;
 
 		double sum = 0;
 		int j = 0;
-		for (; j < n-i; j += 10)
+		for (; j < n-i; j++)
 		{
 			sum += (data[j] - mu) * (data[j+i] - mu);
 		}	
