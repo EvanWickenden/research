@@ -2,12 +2,12 @@
 
 CXX = clang++
 CC = clang++
-CXXFLAGS = -g -Wpedantic -Wall -std=c++11 #-Ofast
+CXXFLAGS = -g -Wall -std=c++11 #-Ofast
 LDFLAGS = -g -lpthread 
 
 
 .PHONY: default
-default: simulation #analyze-samples
+default: simulation 
 
 
 simulation: path-integral.o monitor.o process.o ratio.o

@@ -15,7 +15,7 @@ struct Monitor
 
 	static void* execute(Monitor *m);
 
-	Monitor() : msg("waiting"), N(1), i(0) {}
+	Monitor();
 
 	void prime(const char *msg, long N_initial);
 	Monitor& operator++(int);

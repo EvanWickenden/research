@@ -5,7 +5,7 @@
 
 #include "monitor.h"
 
-
+Monitor::Monitor() : msg("waiting"), N(1), i(0) {}
 
 void *Monitor::execute(Monitor *m)
 {

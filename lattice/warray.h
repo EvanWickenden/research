@@ -25,8 +25,8 @@ struct WArray
 		free(data);
 	}
 
-	T& operator[](int i) { return data[i % N]; }
-	const T& operator[](int i) const { return data[i % N]; }
+	T& operator[](int i) { return data[(i + N) % N]; }
+	const T& operator[](int i) const { return data[(i + N) % N]; }
 
 	WArray(const char *load_filename)
 	{

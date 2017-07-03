@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <math.h>
+#include <time.h>
 #include <random>
 
 #include "warray.h"
@@ -29,9 +30,10 @@ class PathIntegral
 	public:
 
 	Ratio acceptance_ratio;
+	Ratio up_down;
 	Monitor monitor;
 
-	PathIntegral(int N, double tau); 
+	PathIntegral(int N, double tau, double random_dist_width = 0.1, int seed = time(NULL)); 
 
 	void populate_lattice(double start, double end);
 

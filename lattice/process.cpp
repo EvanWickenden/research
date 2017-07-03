@@ -38,7 +38,7 @@ void Process::unnormalized_autocorrelation_function()
 
 		double sum = 0;
 		int j = 0;
-		for (; j < n-i; j += 10)
+		for (; j < n-i; j++)
 		{
 			sum += (data[j] - mu) * (data[j+i] - mu);
 		}	
@@ -65,6 +65,7 @@ double Process::exponential_autocorrelation_time()
 
 	double log_C_0 = std::log(C[0]);
 
+	monitor.prime("exponential autocorrelation function", n);
 
 	/* limit supremum */
 
@@ -76,6 +77,8 @@ increasing:
 	
 	for (; i < n; i++)
 	{
+		monitor++;
+
 		if (C[i] == 0) continue;
 		temp = - i / (std::log(C[i]) - log_C_0);
 		if (temp > tau) tau = temp;
