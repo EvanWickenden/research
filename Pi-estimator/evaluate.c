@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <math.h>
 
 struct coord
 {
@@ -64,6 +65,7 @@ produce:
     {
         if (errno == EAGAIN) 
         {
+            LOG("switch to consume; %d", n);
             goto consume;
         }
         else goto end;
@@ -74,7 +76,6 @@ produce:
     end = (end + 1) % NCOORDS;
     pthread_mutex_unlock(&lock);
     sem_post(&full);
-
 
     goto produce;
 
@@ -87,6 +88,7 @@ consume:
     {
         if (errno == EAGAIN) 
         {
+            LOG("switch to produce; %d", n);
             goto produce;
         }
         else goto end;
@@ -99,7 +101,12 @@ consume:
     sem_post(&empty);
 
     /* accept or reject; add to statistics */
-    do_accept = (coord.x * coord.x + coord.y * coord.y < 1.0);
+    // PI
+    //do_accept = (coord.x * coord.x + coord.y * coord.y < 1.0);
+
+    // x^10 - 1
+    float y = powf(coord.x + 1, 10) - 1;
+    do_accept = (coord.y * pow(2,10) < y);
 
     pthread_mutex_lock(&stats);
     n_runs++;
@@ -114,32 +121,6 @@ end:
 }
 
 
-
-void terminate(int null)
-{
-    int i;
-    LOG("Ctl-C terminating estimation");
-
-    //sem_destroy(&empty);
-    //sem_destroy(&full);
-
-    for (i = 0; i < NTHREADS; i++)
-    {
-        pthread_cancel(workers[i]);
-    }
-
-    /*
-    for (i = 0; i < NTHREADS; i++)
-    {
-        pthread_join(workers[i], NULL);
-    }
-    */
-
-    printf("Estimate for pi: N_TOTAL = %lld; N_ACCEPTED = %lld; pi ~ %f \n", 
-            n_runs, 
-            n_accepts,
-            4 * n_accepts / (float) n_runs); 
-}
 
 
 int main()
@@ -156,20 +137,27 @@ int main()
 
     end = start = 0;
 
+    sigset_t sigset;
+    sigemptyset(&sigset);
+    sigaddset(&sigset, SIGINT);
+    pthread_sigmask(SIG_BLOCK, &sigset, NULL);
+
     for (i = 0; i < NTHREADS; i++)
     {
         pthread_create(workers + i, NULL, execute, NULL);
     }
 
-    struct sigaction act;
-    act.sa_handler = terminate;
-    sigemptyset(&act.sa_mask);
-    act.sa_flags = SA_RESTART;
-    sigaction(SIGINT, &act, NULL);
-
-    pthread_join(workers[0], NULL);
-
-    terminate(0);
+    sigset_t pending;
+    while (sigpending(&pending) == 0)
+    {
+        if (sigismember(&pending, SIGINT))
+        {
+            printf("Estimate for pi: N_TOTAL = %lld; N_ACCEPTED = %lld; integral ~ %f \n", 
+                    n_runs, 
+                    n_accepts,
+                    pow(2,10) * n_accepts / (float) n_runs); 
+        }
+    }
 }
 
 
