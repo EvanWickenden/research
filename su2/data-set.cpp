@@ -9,6 +9,12 @@
 #define min(a, b) ({ double _a = a; double _b = b; (_a < _b) ? _a : _b; })
 
 
+std::ostream& operator << (std::ostream& stream, Analyzable& a)
+{
+    a.write(stream);
+    return stream;
+}
+
 DataSet::DataSet(int n) :
     data(NULL),
     n(n),
@@ -56,11 +62,13 @@ void DataSet::_mean()
 double DataSet::_autocorrelation_fn(int t)
 {
     /* TODO: remove error checking */
+    /*
     if (t >= n)
     {
         std::cout << "autocorrelation_fn out of bounds" << std::endl;
         exit(1);
     }
+    */
 
     double sum = 0;
     int i; 
@@ -155,10 +163,9 @@ void DataSet::analyze()
     _std_dev();
 }
 
-std::ostream& operator<<(std::ostream& stream, DataSet& data)
+void DataSet::write(std::ostream& stream)
 {
-    stream << "mean = " << data.mean << ", exponential autocorrelation time = " << data.exponential_autocorrelation_time
-        << ", integrated autocorrelation time = " << data.integrated_autocorrelation_time 
-        << ", standard deviation = " << data.std_dev << std::endl;
-    return stream;
+    stream << "mean = " << mean << ", exponential autocorrelation time = " << exponential_autocorrelation_time
+        << ", integrated autocorrelation time = " << integrated_autocorrelation_time 
+        << ", standard deviation = " << std_dev << std::endl;
 }

@@ -28,16 +28,21 @@ su2 su2::inverse() const
     return su2(std::conj(a), -b);
 }
 
-Complex su2::trace()
+double su2::half_trace()
 {
-    return a + std::conj(a);
+    return a.real();
+}
+
+double su2::det()
+{
+    return std::norm(a) + std::norm(b);
 }
 
 void su2::re_unitarize()
 {
-    double det = std::norm(a) + std::norm(b);
-    a /= det;
-    b /= det;
+    double sqrt_det = sqrt(det());
+    a /= sqrt_det;
+    b /= sqrt_det;
 }
 
 su2 su2::identity()
@@ -151,5 +156,19 @@ su2 operator * (const double c, const su2& rhs)
     return su2(rhs) *= c;
 }
 
+bool approx_equal(const double a, const double b, double precision)
+{
+    return abs_val(a - b) < precision;
+}
+
+bool approx_equal(const Complex lhs, const Complex rhs, double precision)
+{
+    return approx_equal(lhs.real(), rhs.real()) && approx_equal(lhs.imag(), rhs.imag());
+}
+
+bool approx_equal(const su2& lhs, const su2& rhs, double precision)
+{
+    return approx_equal(lhs.a, rhs.a) && approx_equal(lhs.b, rhs.b);
+}
 
 

@@ -7,7 +7,7 @@
 #include <random>
 #include <math.h>
 
-#include "matrix/matrix.h"
+#include "matrix/matrix.hpp"
 
 typedef std::complex<double> Complex;
 
@@ -37,6 +37,9 @@ struct su2
     su2& operator=(const su2&& rhs);
 
     su2 inverse() const;
+    double half_trace();
+    double det();
+
     void re_unitarize();
 
 
@@ -44,7 +47,6 @@ struct su2
     su2& operator *= (const double c);
     int operator == (const su2& rhs);
     
-    Complex trace();
 
     friend std::ostream& operator<<(std::ostream& stream, const su2& matrix);
     friend std::ostream& operator<<(std::ostream& stream, const su2&& matrix);
@@ -52,5 +54,9 @@ struct su2
 
 su2 operator * (const su2& lhs, const su2& rhs);
 su2 operator * (const double c, const su2& rhs);
+
+bool approx_equal(const double lhs, const double rhs, double precision = 0.0001);
+bool approx_equal(const Complex lhs, const Complex rhs, double precision = 0.0001);
+bool approx_equal(const su2& lhs, const su2& rhs, double precision = 0.0001);
 
 #endif 

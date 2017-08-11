@@ -5,6 +5,7 @@ template <typename T, typename ... S>
 struct Callback
 {
     virtual T operator()(S... args) = 0;
+    virtual ~ Callback () { }
 };
 
 #endif

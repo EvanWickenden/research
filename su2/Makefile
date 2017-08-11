@@ -7,27 +7,17 @@ LDFLAGS = -g
 
 .PHONY: default clean
 
-default: simulation2
 
-simulation2: su2.o data-set.o
+default: simulation
 
-simulation2.o: lattice/lattice2.hpp su2.h path-integral.h
+simulation: data-set.o su2.o
 
-path-integral2.o: lattice/lattice2.hpp path-integral.h su2.h
+simulation.o: path-integral.hpp lattice.hpp su2.h data-set.h callback/callback.h observables.hpp
 
+data-set.o:
 
+su2.o: matrix/matrix.hpp
 
-simulation: lattice.o su2.o path-integral.o data-set.o
-
-simulation.o: lattice.h path-integral.h data-set.h
-
-lattice.o: su2.h lattice.h
-
-su2.o: su2.h 
-
-path-integral.o: lattice.h su2.h path-integral.h
-
-data-set.o: data-set.h
 
 
 clean: 
