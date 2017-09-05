@@ -9,11 +9,13 @@ LDFLAGS = -lm
 default: simulation
 
 
-simulation: path-integral.o 
+simulation: path-integral.o data.o
 
-simulatio.o: path-integral.h warray.h
+simulation.o: path-integral.h warray.h data.h observables.h
 
 path-integral.o: path-integral.h
+
+data.o: data.h
 
 
 
