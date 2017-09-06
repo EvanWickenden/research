@@ -11,99 +11,33 @@
 
 static const int T = 3, X = 8, Y = 8, Z = 8;
 
-struct _Quark 
+template <int nr_configurations>
+struct Snapshot : public Observable<T,X,Y,Z>
 {
-    int width, height;
-    DataSet data;
+    char lattices[nr_configurations * sizeof(Lattice<T,X,Y,Z>)]; 
+    int index;
 
-    _Quark(int width, int height, int n) :
-        width(width),
-        height(height),
-        data(n)
-    { }
+#define SIZE  (sizeof (Lattice<T,X,Y,Z>))
 
-    void operator () (const Lattice<T,X,Y,Z>& lattice)
+    Snapshot() : index(0) {}
+
+    void operator () (const Lattice<T,X,Y,Z>& l)
     {
-        data.store(lattice.wilson_loop<0,1>(width, height, (int[4]){0,0,0,0}).half_trace());
-    }
-
-    void analyze()
-    {
-        data.analyze();
-    }
-
-    friend std::ostream& operator << (std::ostream& stream, _Quark& q)
-    {
-        stream << "quark path - T = " << q.height << ", R = " << q.width << ";\n";
-        stream << q.data;
-        return stream;
-    }
-};
-
-template <int length>
-struct Quarks : public Observable<T,X,Y,Z>
-{
-    _Quark* quarks[length][length];
-
-    struct Data
-    {
-        double mean, std_dev;
-        int T, R;
+        memcpy(lattices + (index++) * SIZE, &l, SIZE);
     };
 
-    std::vector<Data> data[(length + 1) * (length + 1)];
-
-#define for_each(i,j)                       \
-    for (int i = 0; i < length; i++)        \
-    for (int j = 0; j < length; j++)
-
-    Quarks(int n) 
+    Lattice<T,X,Y,Z>& get(int index)
     {
-        for_each(i,j) quarks[i][j] = new _Quark(i+1, j+1, n);
-    }
+        return * (Lattice<T,X,Y,Z> *) (lattices + index * SIZE);
+    };
 
-    ~Quarks()
-    {
-        for_each(i,j) delete quarks[i][j];
-    }
-
-    void operator () (const Lattice<T,X,Y,Z>& lattice) override
-    {
-        for_each(i,j) (*quarks[i][j])(lattice);
-    }
-
-    void analyze()
-    {
-        for_each(i,j) 
-        {
-            quarks[i][j]->analyze();
-            data[(i+1)*(j+1)].push_back((Data){quarks[i][j]->data.mean, quarks[i][j]->data.std_dev, i, j});
-        }
-    }
-
-    friend std::ostream& operator << (std::ostream& stream, Quarks& q)
-    {
-        for (int i = 1; i <= length * length; i++)
-        {
-            std::cout << "Area: " << i << std::endl;
-            for (auto _data = q.data[i].begin(); _data != q.data[i].end(); ++_data)
-            {
-                std::cout << "[" << _data->mean << ", " << _data->std_dev << ", " << _data->T << ", " << _data->R << "] ";
-            }
-            std::cout << "\n" << std::endl;
-        }
-
-        return stream;
-    }
-
-#undef for_each
+#undef SIZE
 };
 
-struct Nil : public Observable<T,X,Y,Z>
+template <typename _Snapshot> struct WilsonLoop
 {
-    void operator () (const Lattice<T,X,Y,Z>& lattice) override {}
+    
 };
-
 
 
 int main()
@@ -118,9 +52,10 @@ int main()
     std::mt19937 gen(ran());
 
     static Lattice<T,X,Y,Z> lattice(gen, 0.1);
-    Nil n;
 
-    path_integral<T,X,Y,Z>(lattice, beta, nr_configurations, width, n, gen);
+    std::cout << sizeof(Lattice<T,X,Y,Z>) << std::endl;
+
+//    path_integral<T,X,Y,Z>(lattice, beta, nr_configurations, width, n, gen);
 
     /*
 
